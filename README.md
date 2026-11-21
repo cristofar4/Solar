@@ -20,7 +20,7 @@ python3 -m http.server 8000
 
 | Section | What it does |
 | --- | --- |
-| **Header** | Transparent over the hero, turns to frosted glass on scroll, and hides while you read down. **Solutions** opens a menu with photo cards. A small chip shows whether the sun is up near you. On phones there's a full-screen menu. |
+| **Header** | Fixed to the top of the screen at all times. Transparent over the hero, it turns to frosted glass once you scroll. **Solutions** opens a menu with photo cards. A small chip shows whether the sun is up near you. On phones there's a full-screen menu. |
 | **Hero** | Full-screen slideshow of four real photos with the cell transition, a slow zoom and progress bars you can click. Scrolling shrinks the photo into a rounded frame. |
 | **Trust bar** | 25-year warranty, 1–2 days on site, 24/7 monitoring, one crew. |
 | **Statement** | The words light up as you scroll, the counters count up, and an installer photo wipes in with parallax. |

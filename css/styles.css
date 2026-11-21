@@ -132,15 +132,14 @@ p { margin: 0; }
 /* =========================================================================
    HEADER
    ========================================================================= */
-.header { position: fixed; left: 0; right: 0; top: env(safe-area-inset-top, 0px); z-index: 60; transition: transform .6s var(--ease), background-color .4s; }
+.header { position: fixed; left: 0; right: 0; top: env(safe-area-inset-top, 0px); z-index: 60; }
 .header::before {
   content: ""; position: absolute; inset: 0; z-index: -1;
-  background: rgb(10 16 26 / .72); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  background: rgb(10 16 26 / .86); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2);
   border-bottom: 1px solid var(--line);
   opacity: 0; transition: opacity .4s;
 }
 .header.is-solid::before, .header.mega-open::before { opacity: 1; }
-.header.is-hidden { transform: translateY(-100%); }
 .header__bar { display: flex; align-items: center; gap: 28px; height: 76px; }
 
 .logo { display: inline-flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; flex: none; }

@@ -83,20 +83,9 @@
   const mega = $('#mega');
   const burger = $('#burger');
   const menu = $('#menu');
-  let lastY = window.scrollY;
-
-  function onScroll() {
-    const y = window.scrollY;
-    header.classList.toggle('is-solid', y > 40);
-    const open = !mega.hidden || !menu.hidden;
-    if (!open) {
-      if (y > lastY + 6 && y > 500) header.classList.add('is-hidden');
-      else if (y < lastY - 6 || y < 200) header.classList.remove('is-hidden');
-    }
-    lastY = y;
-  }
+  // the header stays fixed on screen; it only gains a glass background once you scroll
+  function onScroll() { header.classList.toggle('is-solid', window.scrollY > 40); }
   window.addEventListener('scroll', onScroll, { passive: true });
-  header.addEventListener('focusin', () => header.classList.remove('is-hidden'));
   onScroll();
 
   // mega menu: hover on desktop, click and keyboard everywhere
@@ -128,7 +117,6 @@
     burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
     document.body.style.overflow = open ? 'hidden' : '';
     if (SOLAR.lenis) { if (open) SOLAR.lenis.stop(); else SOLAR.lenis.start(); }
-    header.classList.remove('is-hidden');
     header.classList.toggle('is-solid', open || window.scrollY > 40);
   }
   burger.addEventListener('click', () => setMenu(menu.hidden));
