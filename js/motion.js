@@ -135,18 +135,21 @@
             m.appendChild(w); frag.appendChild(m);
           });
           n.replaceWith(frag);
-        } else if (n.nodeType === 1) walk(n);
+        } else if (n.nodeType === 1 && !n.classList.contains('curl')) walk(n);
       });
     };
     walk(el);
     el.dataset.splitDone = '1';
     return $$('.w', el);
   }
+  // the script word appears as if written, left to right
+  const write = (el, at) => ({ el, from: { clipPath: 'inset(0% 100% 0% 0%)' }, to: { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.3, ease: 'power2.inOut' }, at });
 
   /* ---------------------------------------------------------------- 3 */
   const heroMedia = $('[data-hero-media]');
   const titleWords = splitWords($('.hero__title'));
   gsap.set(titleWords, { yPercent: 118 });
+  gsap.set('.hero__title .curl', { clipPath: 'inset(0% 100% 0% 0%)' });
   gsap.set('.hero__title', { opacity: 1 });
   gsap.set('.hero .eyebrow', { y: 20, opacity: 0 });
   gsap.set('.hero__row', { opacity: 1 });
@@ -179,6 +182,7 @@
       .to('.header__bar > *', { y: 0, opacity: 1, duration: 1.1, stagger: 0.06 }, 0.8)
       .to('.hero .eyebrow', { y: 0, opacity: 1, duration: 1 }, 0.9)
       .to(titleWords, { yPercent: 0, duration: 1.4, stagger: 0.07 }, 0.95)
+      .to('.hero__title .curl', { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.4, ease: 'power2.inOut' }, 1.35)
       .to('.hero__row > *', { y: 0, opacity: 1, duration: 1.1, stagger: 0.1 }, 1.35)
       .to('.hero__dock', { y: 0, opacity: 1, duration: 1 }, 1.6);
   }
@@ -241,7 +245,13 @@
 
   /* ---------------------------------------------------------------- 6 */
   $$('[data-split]').forEach((h) => {
-    gsap.from(splitWords(h), { yPercent: 118, duration: 1.3, ease: 'expo.out', stagger: 0.06, scrollTrigger: { trigger: h, start: 'top 88%' } });
+    const ws = splitWords(h);
+    const tl = gsap.timeline({ scrollTrigger: { trigger: h, start: 'top 88%' } });
+    tl.from(ws, { yPercent: 118, duration: 1.3, ease: 'expo.out', stagger: 0.06 });
+    $$('.curl', h).forEach((c) => {
+      const w = write(c);
+      tl.fromTo(w.el, w.from, w.to, Math.min(0.9, ws.length * 0.06 + 0.25));
+    });
   });
   $$('.label').forEach((l) => {
     if (l.closest('.hero')) return;

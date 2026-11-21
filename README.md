@@ -13,7 +13,7 @@ python3 -m http.server 8000
 ## Design
 
 - **Look:** dark, cinematic and built around real photography. The palette is a solar cell at dusk, blue-black glass with aluminium greys, lit by one warm sunlight accent. One light "daylight" section (How it works) breaks up the dark.
-- **Type:** Archivo set wide for headlines, Geist for text, and Geist Mono for small labels.
+- **Type:** Fraunces, a soft and curly serif, for headlines. Pinyon Script, a flowing script, sets one gold accent word in each headline, and that word appears as if being written. Geist is used for text and Geist Mono for small labels.
 - **Signature effect:** photos change by switching on cell by cell, like a panel catching the sun. Each cell scales in carrying its slice of the next photo, with a flash of sunlight. The same effect opens the page and runs the hero slideshow and the How it works frame.
 
 ## Sections
