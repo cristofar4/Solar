@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -9,9 +9,21 @@
 <meta name="theme-color" content="#F3F0EA">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Lexend:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Lexend:wght@200;300;400;500&display=swap">
 <link rel="stylesheet" href="css/styles.css">
-<script>try{var t=localStorage.getItem("solar-theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t}catch(e){}</script>
+<script>
+  /* runs before paint: decide whether the intro plays */
+  (function () {
+    var d = document.documentElement;
+    d.classList.remove('no-js'); d.classList.add('js');
+    try {
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        d.classList.add('is-intro');
+        if (!sessionStorage.getItem('solar-intro-seen')) d.classList.add('is-loading');
+      }
+    } catch (e) {}
+  })();
+</script>
 </head>
 <body>
 
@@ -28,294 +40,376 @@
   <symbol id="i-plus" viewBox="0 0 24 24">
     <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
   </symbol>
-  <symbol id="i-moon" viewBox="0 0 24 24">
-    <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
-  </symbol>
-  <symbol id="i-day" viewBox="0 0 24 24">
-    <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></g>
-  </symbol>
   <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5Z" fill="currentColor"/></symbol>
   <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7.5 5.5h3v13h-3zM13.5 5.5h3v13h-3z" fill="currentColor"/></symbol>
 </svg>
 
 <a class="skip" href="#main">Skip to content</a>
 
+<!-- ============ INTRO LOADER ============ -->
+<div class="loader" aria-hidden="true">
+  <div class="loader__half loader__half--a"></div>
+  <div class="loader__half loader__half--b"></div>
+  <div class="loader__center">
+    <svg class="loader__mark" viewBox="0 0 64 64">
+      <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round">
+        <path class="ray" pathLength="1" d="M32 5v15"/>
+        <path class="ray" pathLength="1" d="M51.1 12.9 40.5 23.5"/>
+        <path class="ray" pathLength="1" d="M59 32H44"/>
+        <path class="ray" pathLength="1" d="M51.1 51.1 40.5 40.5"/>
+        <path class="ray" pathLength="1" d="M32 59V44"/>
+        <path class="ray" pathLength="1" d="M12.9 51.1 23.5 40.5"/>
+        <path class="ray" pathLength="1" d="M5 32h15"/>
+        <path class="ray" pathLength="1" d="M12.9 12.9 23.5 23.5"/>
+      </g>
+    </svg>
+    <p class="loader__count"><span data-loader-count>000</span><small>Charging</small></p>
+  </div>
+</div>
+
+<!-- Fixed sky: the page's daylight, driven by scroll -->
+<div class="sky" aria-hidden="true"><div class="sky__glow"></div></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="cursor" aria-hidden="true"><div class="cursor__ring"><span class="cursor__label"></span></div><div class="cursor__dot"></div></div>
+
 <!-- ============ HEADER: the sun-path navigation ============ -->
 <header class="masthead" id="masthead">
   <div class="masthead__inner wrap">
-    <a class="brand" href="#top" aria-label="Solar, back to top">
+    <a class="brand" href="#top" aria-label="Solar, back to top" data-intro>
       <svg class="brand__mark" aria-hidden="true"><use href="#i-sun"/></svg>
       <span class="brand__word">solar</span>
     </a>
 
-    <nav class="sky" id="sky" aria-label="Primary">
-      <div class="sky__dome" aria-hidden="true">
-        <span class="sky__time sky__time--rise" data-sunrise>06:10</span>
-        <svg class="sky__arc" preserveAspectRatio="none">
-          <path class="sky__path" d=""/>
-          <path class="sky__elapsed" d=""/>
-          <g class="sky__ticks"></g>
+    <nav class="sunpath" id="sunpath" aria-label="Primary" data-intro>
+      <div class="sunpath__dome" aria-hidden="true">
+        <span class="sunpath__time sunpath__time--rise">↑06:10</span>
+        <svg class="sunpath__arc" preserveAspectRatio="none">
+          <path class="sunpath__path" d=""/>
+          <path class="sunpath__elapsed" d=""/>
+          <g class="sunpath__ticks"></g>
         </svg>
-        <span class="sky__sun"><span class="sky__core"></span></span>
-        <span class="sky__time sky__time--set" data-sunset>18:40</span>
+        <span class="sunpath__sun"><span class="sunpath__core"></span></span>
+        <span class="sunpath__time sunpath__time--set">18:30↓</span>
       </div>
-      <ul class="sky__links">
-        <li><a href="#homes" data-nav="homes">Homes</a></li>
-        <li><a href="#business" data-nav="business">Business</a></li>
+      <ul class="sunpath__links">
+        <li><a href="#how" data-nav="how">How it works</a></li>
         <li><a href="#systems" data-nav="systems">Systems</a></li>
+        <li><a href="#day" data-nav="day">Your day</a></li>
         <li><a href="#projects" data-nav="projects">Projects</a></li>
       </ul>
     </nav>
 
-    <button class="daynight" id="daynight" type="button" aria-label="Switch to night view" title="Switch to night view">
-      <svg class="daynight__moon" aria-hidden="true"><use href="#i-moon"/></svg>
-      <svg class="daynight__sun" aria-hidden="true"><use href="#i-day"/></svg>
-    </button>
-
-    <a class="cta" href="#contact">
+    <a class="cta" href="#contact" data-intro data-magnetic>
       <span class="cta__label">Plan my installation</span>
-      <span class="cta__dot" data-sun-state title="Sun is up near you"></span>
+      <span class="cta__dot"></span>
     </a>
 
-    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="drawer">
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="drawer" data-intro>
       <span class="menu-btn__label">Menu</span>
       <span class="menu-btn__bars" aria-hidden="true"><i></i><i></i></span>
     </button>
   </div>
 
-  <!-- Mobile drawer -->
   <div class="drawer" id="drawer" hidden>
     <div class="drawer__inner wrap">
       <ol class="drawer__links">
-        <li><a href="#homes" data-nav="homes"><span>Homes</span><small>Rooftop solar and batteries for the way you live.</small></a></li>
-        <li><a href="#business" data-nav="business"><span>Business</span><small>Lower running costs and power that stays on.</small></a></li>
-        <li><a href="#systems" data-nav="systems"><span>Systems</span><small>Panels, storage and the care that keeps them working.</small></a></li>
+        <li><a href="#how" data-nav="how"><span>How it works</span><small>Sunlight to evening light, in three steps.</small></a></li>
+        <li><a href="#systems" data-nav="systems"><span>Systems</span><small>Panels, batteries and the care that keeps them working.</small></a></li>
+        <li><a href="#day" data-nav="day"><span>Your day</span><small>Drag the sun and watch your energy move.</small></a></li>
         <li><a href="#projects" data-nav="projects"><span>Projects</span><small>Installed, measured and still performing.</small></a></li>
       </ol>
       <div class="drawer__foot">
         <a class="btn btn--sun" href="#contact">Plan my installation <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
-        <p class="drawer__sun" data-sun-summary>Sunrise 06:10 · Sunset 18:40</p>
       </div>
     </div>
   </div>
 </header>
 
-<!-- Section rail (wide screens) -->
+<!-- Section rail: the page clock (wide screens) -->
 <aside class="rail" aria-label="Page sections">
-  <p class="rail__label"><span class="rail__num" data-rail-num>01</span> / <span data-rail-text>A different view of energy</span></p>
-  <ol class="rail__track">
-    <li><a href="#top" data-rail="top" aria-label="Overview"></a></li>
-    <li><a href="#homes" data-rail="homes" aria-label="One approach"></a></li>
-    <li><a href="#systems" data-rail="systems" aria-label="Systems"></a></li>
-    <li><a href="#day" data-rail="day" aria-label="A day on your roof"></a></li>
-    <li><a href="#projects" data-rail="projects" aria-label="Projects"></a></li>
-    <li><a href="#care" data-rail="care" aria-label="Care"></a></li>
-    <li><a href="#contact" data-rail="contact" aria-label="Contact"></a></li>
-  </ol>
+  <p class="rail__label"><span class="rail__time" data-rail-time>05:50</span> / <span data-rail-text>Before sunrise</span></p>
+  <ol class="rail__track" data-rail-track></ol>
 </aside>
 
 <main id="main">
 
-  <!-- ============ HERO ============ -->
-  <section class="hero" id="top" data-section="top" data-rail-title="A different view of energy">
-    <div class="wrap">
-      <div class="hero__head">
-        <div class="hero__title">
-          <p class="eyebrow eyebrow--line">Energy, considered.</p>
-          <h1>Power, shaped<br> around your life.</h1>
+  <!-- ============ 05:50 HERO ============ -->
+  <section class="hero" id="top" data-scene data-time="350" data-label="Before sunrise">
+    <div class="hero__pin">
+      <div class="wrap hero__top">
+        <div class="hero__titlewrap">
+          <p class="chip" data-intro><span class="chip__dot"></span>05:50 · Before sunrise</p>
+          <h1 class="hero__title" data-intro>
+            <span class="line">Power, shaped</span>
+            <span class="line">around <span class="hl">your life.</span></span>
+          </h1>
         </div>
-        <p class="hero__lede">Solar installation, battery storage and care for homes and businesses.</p>
+        <div class="hero__side" data-intro>
+          <p class="hero__lede">Solar installation, battery storage and care for homes and businesses.</p>
+          <div class="hero__ctas">
+            <a class="btn btn--dark" href="#contact" data-magnetic>Plan my installation <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            <a class="btn btn--line" href="#how">See how it works</a>
+          </div>
+        </div>
       </div>
 
-      <div class="fold" aria-label="One home across one day: first light, midday peak and evening">
-        <figure class="fold__panel fold__panel--dawn">
-          <img src="assets/img/hero-house-dusk.webp" alt="" width="1800" height="1200" fetchpriority="high">
-          <figcaption class="fold__tag"><b>06:40</b> <span>First light, battery charging</span></figcaption>
-        </figure>
-        <figure class="fold__panel fold__panel--noon">
-          <img src="assets/img/hero-house-dusk.webp" alt="" width="1800" height="1200">
-          <figcaption class="fold__tag"><b>13:10</b> <span>Peak sun, 6.2 kW</span></figcaption>
-        </figure>
-        <figure class="fold__panel fold__panel--dusk">
-          <img src="assets/img/hero-house-dusk.webp" alt="A modern two-storey house at dusk with its lights on, set under a large gum tree" width="1800" height="1200">
-          <figcaption class="fold__tag"><b>19:45</b> <span>Evening, running on stored sun</span></figcaption>
-        </figure>
-        <a class="fold__cta" href="#homes">Explore your system <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <div class="stage" data-stage>
+        <div class="tilt" data-tilt-hero>
+          <div class="fold3d" data-fold data-intro>
+            <figure class="fold3d__panel p-dawn">
+              <img src="assets/img/hero-house-dusk.webp" alt="" width="1800" height="1200" fetchpriority="high">
+              <figcaption class="fold3d__tag"><b>06:40</b> <span>First light</span></figcaption>
+            </figure>
+            <figure class="fold3d__panel p-noon">
+              <img src="assets/img/hero-house-dusk.webp" alt="" width="1800" height="1200">
+              <figcaption class="fold3d__tag"><b>13:10</b> <span>Peak sun, 6.2 kW</span></figcaption>
+            </figure>
+            <figure class="fold3d__panel p-dusk">
+              <img src="assets/img/hero-house-dusk.webp" alt="A modern two-storey house at dusk with its lights on, under a large gum tree" width="1800" height="1200">
+              <figcaption class="fold3d__tag"><b>19:45</b> <span>Running on stored sun</span></figcaption>
+            </figure>
+          </div>
+        </div>
+        <p class="stage__caption" aria-hidden="true"><span>One home.</span> <span>One day.</span></p>
+      </div>
+      <p class="scroll-cue" aria-hidden="true"><i></i>Scroll to live the day</p>
+    </div>
+  </section>
+
+  <!-- ============ 07:30 STATEMENT ============ -->
+  <section class="statement" id="statement" data-scene data-time="450" data-label="Sunrise">
+    <div class="wrap">
+      <p class="eyebrow eyebrow--line">07:30 · Sunrise</p>
+      <p class="statement__text" data-words>A roof in full sun takes in about a kilowatt of light on every square metre. We design the system that <em>catches it</em>, the battery that <em>keeps it</em>, and the care that keeps both working for <em>25&nbsp;years</em>.</p>
+      <dl class="stats">
+        <div class="stat"><dt>Years of panel warranty</dt><dd><span data-count="25">25</span></dd></div>
+        <div class="stat"><dt>Minutes between system check-ins</dt><dd><span data-count="15">15</span></dd></div>
+        <div class="stat"><dt>Hours, at most, until an engineer arrives</dt><dd><span data-count="48">48</span></dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ============ 09:00 HOW IT WORKS ============ -->
+  <section class="how" id="how" data-scene data-time="540" data-label="How it works">
+    <div class="how__pin">
+      <div class="wrap how__grid">
+        <div class="how__copy">
+          <p class="eyebrow eyebrow--line">09:00 · How it works</p>
+          <h2 data-split>Sunlight to evening light, in three steps.</h2>
+          <ol class="steps">
+            <li class="step is-active" data-step="0">
+              <span class="step__num">01</span>
+              <div><h3>Capture</h3><p>Panels turn daylight into electricity from the first minutes after sunrise.</p></div>
+              <i class="step__bar"><b></b></i>
+            </li>
+            <li class="step" data-step="1">
+              <span class="step__num">02</span>
+              <div><h3>Store</h3><p>Whatever the house isn’t using goes into the battery instead of back to the grid for pennies.</p></div>
+              <i class="step__bar"><b></b></i>
+            </li>
+            <li class="step" data-step="2">
+              <span class="step__num">03</span>
+              <div><h3>Use</h3><p>After sunset the house runs on the battery. The grid becomes the backup.</p></div>
+              <i class="step__bar"><b></b></i>
+            </li>
+          </ol>
+        </div>
+        <div class="how__scene">
+          <canvas class="photons" data-photons role="img" aria-label="Animation: sunlight hits the panels, energy fills the battery, and the battery lights the house after dark"></canvas>
+          <div class="how__readout" aria-hidden="true">
+            <span><small>Time</small><b data-hr="time">09:00</b></span>
+            <span><small>Panels</small><b><i data-hr="pv">0.0</i> kW</b></span>
+            <span><small>Battery</small><b><i data-hr="soc">20</i>%</b></span>
+            <span><small>Home</small><b><i data-hr="home">0.0</i> kW</b></span>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ============ APPROACH ============ -->
-  <section class="approach" id="homes" data-section="homes" data-rail-title="One approach">
-    <span class="anchor" id="business"></span>
-    <div class="wrap">
-      <h2 class="rule-title"><span>One approach. Your kind of power.</span></h2>
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__track" data-marquee>
+      <span>Capture</span><svg><use href="#i-sun"/></svg><span>Store</span><svg><use href="#i-sun"/></svg><span>Use</span><svg><use href="#i-sun"/></svg><span>Care</span><svg><use href="#i-sun"/></svg>
+      <span>Capture</span><svg><use href="#i-sun"/></svg><span>Store</span><svg><use href="#i-sun"/></svg><span>Use</span><svg><use href="#i-sun"/></svg><span>Care</span><svg><use href="#i-sun"/></svg>
+    </div>
+  </div>
 
-      <div class="bento">
-        <article class="card card--fit" data-mode="home">
-          <div class="card--fit__media">
-            <img class="is-active" data-mode-img="home" src="assets/img/home-solar-roof.webp" alt="A brick house with a full roof of black solar panels" width="1000" height="1500" loading="lazy">
-            <img data-mode-img="business" src="assets/img/business-rooftop.webp" alt="Rows of solar panels on a warehouse roof at sunset" width="1400" height="947" loading="lazy">
-          </div>
-          <div class="card--fit__copy">
-            <p class="index">01</p>
-            <h3>A system that fits.</h3>
-            <p class="card--fit__spec" data-mode-spec>6–12 kW rooftop · 10–15 kWh battery</p>
-          </div>
-          <div class="card--fit__foot">
-            <div class="segment" role="radiogroup" aria-label="Show systems for">
-              <button type="button" role="radio" aria-checked="true" data-mode-btn="home">Home</button>
-              <button type="button" role="radio" aria-checked="false" data-mode-btn="business">Business</button>
+  <!-- ============ 12:00 SYSTEMS (horizontal) ============ -->
+  <section class="systems" id="systems" data-scene data-time="720" data-label="Peak sun">
+    <div class="systems__pin">
+      <div class="wrap systems__head">
+        <div>
+          <p class="eyebrow eyebrow--line">12:00 · Peak sun</p>
+          <h2 data-split>From possibility to a working system.</h2>
+        </div>
+        <p class="systems__count" aria-hidden="true"><span data-sys-index>01</span><span> / 05</span></p>
+      </div>
+
+      <div class="hscroll" data-hscroll>
+        <div class="hscroll__track">
+          <article class="sys">
+            <div class="sys__copy">
+              <span class="sys__num">01</span>
+              <h3>Solar installation</h3>
+              <p>We survey the roof, model the shade through the year and draw a layout for your roof alone.</p>
+              <ul class="chips"><li>Typical home: 6–10 kW</li><li>1–2 days on site</li><li>25-year module warranty</li></ul>
             </div>
-            <a class="link-arrow" href="#systems">Explore systems <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
-          </div>
-          <span class="corner" aria-hidden="true"></span>
-        </article>
+            <div class="sys__media"><img src="assets/img/care-install.webp" alt="An installer lowering a solar panel onto a pitched roof" width="1400" height="1050" loading="lazy"></div>
+          </article>
 
-        <article class="card card--life">
-          <img src="assets/img/commercial-dusk.webp" alt="A glass office building behind rows of ground-mounted solar panels at a pink sunset" width="1600" height="1067" loading="lazy">
-          <p class="index index--light">02</p>
-          <div class="card--life__note">
-            <h3>Built into everyday life.</h3>
-            <a class="link-arrow" href="#projects">View installations <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
-          </div>
-        </article>
+          <article class="sys">
+            <div class="sys__copy">
+              <span class="sys__num">02</span>
+              <h3>Battery storage</h3>
+              <p>Keep the midday surplus for the evening, and keep the lights on through a power cut. The switch-over takes milliseconds.</p>
+              <ul class="chips"><li>10–15 kWh per home</li><li>Whole-home or essentials backup</li><li>10-year warranty</li></ul>
+            </div>
+            <div class="sys__media sys__media--battery">
+              <svg class="battery" viewBox="0 0 480 520" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A wall-mounted home battery with an inverter above it">
+                <defs>
+                  <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EDE3D2"/><stop offset="1" stop-color="#D9CCB6"/></linearGradient>
+                  <linearGradient id="unit" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".7" stop-color="#F3F1EC"/><stop offset="1" stop-color="#DCD8CF"/></linearGradient>
+                  <radialGradient id="light" cx=".25" cy=".2" r=".9"><stop offset="0" stop-color="#FFF6DD" stop-opacity=".9"/><stop offset="1" stop-color="#FFF6DD" stop-opacity="0"/></radialGradient>
+                </defs>
+                <rect width="480" height="520" fill="url(#wall)"/>
+                <rect width="480" height="520" fill="url(#light)"/>
+                <rect y="438" width="480" height="82" fill="#CDBFA8"/>
+                <ellipse cx="200" cy="446" rx="120" ry="10" fill="#000" opacity=".12"/>
+                <path d="M300 214c0 30 0 46 18 46h40M290 230c0 36 6 46 28 46h40M280 246c0 40 12 46 38 46h40" fill="none" stroke="#3A3935" stroke-width="7" stroke-linecap="round"/>
+                <rect x="318" y="118" width="104" height="132" rx="10" fill="url(#unit)" stroke="#CFCAC0"/>
+                <rect x="346" y="146" width="48" height="28" rx="4" fill="#2B2A27"/>
+                <rect x="352" y="158" width="20" height="4" rx="2" fill="#F5C21B" class="battery__blink"/>
+                <rect x="100" y="150" width="200" height="290" rx="16" fill="url(#unit)" stroke="#CFCAC0"/>
+                <g transform="translate(200 268)" stroke="#F5C21B" stroke-width="6" stroke-linecap="round" class="battery__logo">
+                  <path d="M0-26v14M0 12v14M-26 0h14M12 0h14M-18.4-18.4l9.9 9.9M8.5 8.5l9.9 9.9M-18.4 18.4l9.9-9.9M8.5-8.5l9.9-9.9"/>
+                </g>
+                <g class="battery__cells">
+                  <rect x="282" y="312" width="6" height="22" rx="3"/><rect x="282" y="284" width="6" height="22" rx="3"/><rect x="282" y="256" width="6" height="22" rx="3"/><rect x="282" y="228" width="6" height="22" rx="3"/><rect x="282" y="200" width="6" height="22" rx="3"/>
+                </g>
+              </svg>
+            </div>
+          </article>
 
-        <article class="card card--assess">
-          <p class="index index--light">03</p>
-          <div class="card--assess__body">
-            <svg class="card--assess__mark" aria-hidden="true"><use href="#i-sun"/></svg>
-            <div class="card--assess__text">
+          <article class="sys">
+            <div class="sys__copy">
+              <span class="sys__num">03</span>
+              <h3>Long-term care</h3>
+              <p>Your system reports in every 15 minutes. We watch its output against the weather and come out when something drifts.</p>
+              <ul class="chips"><li>Remote monitoring</li><li>Annual health check</li><li>Engineer within 48 hours</li></ul>
+            </div>
+            <div class="sys__media"><img src="assets/img/care-support.webp" alt="Gloved hands working on the frame of a solar panel" width="1400" height="784" loading="lazy"></div>
+          </article>
+
+          <article class="sys sys--fit" data-mode="home">
+            <div class="sys__copy">
+              <span class="sys__num">04</span>
+              <h3>A system that fits.</h3>
+              <p data-mode-spec>Homes: 6–12 kW on the roof and a 10–15 kWh battery on the wall.</p>
+              <div class="segment" role="radiogroup" aria-label="Show systems for">
+                <button type="button" role="radio" aria-checked="true" data-mode-btn="home">Home</button>
+                <button type="button" role="radio" aria-checked="false" data-mode-btn="business" tabindex="-1">Business</button>
+              </div>
+            </div>
+            <div class="sys__media">
+              <img class="is-active" data-mode-img="home" src="assets/img/home-solar-roof.webp" alt="A brick house with a full roof of black solar panels" width="1000" height="1500" loading="lazy">
+              <img data-mode-img="business" src="assets/img/business-rooftop.webp" alt="Rows of solar panels on a warehouse roof at sunset" width="1400" height="947" loading="lazy">
+            </div>
+          </article>
+
+          <article class="sys sys--cta">
+            <div class="sys__cta">
+              <svg class="sys__cta-mark" aria-hidden="true"><use href="#i-sun"/></svg>
+              <span class="sys__num">05</span>
               <h3>Start with a site assessment.</h3>
               <p>Your property. Your needs. A considered plan.</p>
+              <a class="btn btn--sun" href="#contact" data-magnetic>Let’s talk <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
             </div>
-            <a class="btn btn--ghost" href="#contact">Let’s talk</a>
-          </div>
-        </article>
+          </article>
+        </div>
       </div>
+      <div class="wrap"><div class="hscroll__bar" aria-hidden="true"><i data-sys-bar></i></div></div>
     </div>
   </section>
 
-  <!-- ============ SYSTEMS ============ -->
-  <section class="systems" id="systems" data-section="systems" data-rail-title="From possibility to a system">
-    <div class="wrap systems__grid">
-      <h2 class="systems__title">From possibility to a working system.</h2>
-
-      <ol class="services">
-        <li class="service">
-          <button class="service__row" type="button" aria-expanded="false" aria-controls="svc-1">
-            <span class="service__num">01 /</span>
-            <span class="service__name">Solar installation</span>
-            <span class="service__desc">A tailored solar system for your property.</span>
-            <svg class="service__icon" aria-hidden="true"><use href="#i-arrow"/></svg>
-          </button>
-          <div class="service__more" id="svc-1">
-            <div>
-              <p>We survey the roof, model shading through the year and draw a panel layout for your roof alone. Modules are monocrystalline, 400–450 W each.</p>
-              <ul class="chips">
-                <li>Typical home: 6–10 kW</li>
-                <li>1–2 days on site</li>
-                <li>25-year module warranty</li>
-              </ul>
-            </div>
-          </div>
-        </li>
-        <li class="service">
-          <button class="service__row" type="button" aria-expanded="false" aria-controls="svc-2">
-            <span class="service__num">02 /</span>
-            <span class="service__name">Battery storage</span>
-            <span class="service__desc">Keep more of your energy, ready when you need it.</span>
-            <svg class="service__icon" aria-hidden="true"><use href="#i-arrow"/></svg>
-          </button>
-          <div class="service__more" id="svc-2">
-            <div>
-              <p>Store the midday surplus and use it in the evening, or keep the lights and fridge on through a power cut. The switch-over happens in milliseconds.</p>
-              <ul class="chips">
-                <li>10–15 kWh per home</li>
-                <li>Whole-home or essentials backup</li>
-                <li>10-year warranty</li>
-              </ul>
-            </div>
-          </div>
-        </li>
-        <li class="service">
-          <button class="service__row" type="button" aria-expanded="false" aria-controls="svc-3">
-            <span class="service__num">03 /</span>
-            <span class="service__name">Long-term care</span>
-            <span class="service__desc">Ongoing service to keep your system performing well.</span>
-            <svg class="service__icon" aria-hidden="true"><use href="#i-arrow"/></svg>
-          </button>
-          <div class="service__more" id="svc-3">
-            <div>
-              <p>Your system reports in every 15 minutes. We watch output against the weather, clean and inspect once a year, and come out when something drifts.</p>
-              <ul class="chips">
-                <li>Remote monitoring</li>
-                <li>Annual health check</li>
-                <li>Engineer within 48 hours</li>
-              </ul>
-            </div>
-          </div>
-        </li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- ============ A DAY ON YOUR ROOF (simulator) ============ -->
-  <section class="day" id="day" data-section="systems" data-rail-key="day" data-rail-title="A day on your roof">
+  <!-- ============ 14:30 YOUR DAY (simulator) ============ -->
+  <section class="day tone-panel" id="day" data-scene data-time="870" data-label="Your roof today">
     <div class="wrap">
       <div class="day__head">
         <div>
-          <p class="eyebrow eyebrow--line eyebrow--on-panel">A day on your roof</p>
-          <h2>Drag the sun. Watch the energy move.</h2>
+          <p class="eyebrow eyebrow--line">14:30 · Your roof today</p>
+          <h2 data-split>Drag the sun across your day.</h2>
         </div>
-        <p class="day__note">Modelled for an 8 kW rooftop system with a 13.5 kWh battery, on a clear day where you are. It opens at your current time.</p>
+        <p class="day__note">Modelled for an 8 kW rooftop system with a 13.5 kWh battery, on a clear day where you are. It starts at your current time.</p>
       </div>
 
-      <div class="day__board">
-        <div class="day__clock">
-          <p class="day__time" data-sim-time>12:00</p>
-          <p class="day__phase" data-sim-phase>Midday sun</p>
-          <button class="day__play" type="button" data-sim-play aria-pressed="false">
-            <svg class="i-play" aria-hidden="true"><use href="#i-play"/></svg>
-            <svg class="i-pause" aria-hidden="true"><use href="#i-pause"/></svg>
-            <span data-sim-play-label>Play the day</span>
-          </button>
-        </div>
-
-        <div class="day__chart">
-          <svg class="chart" data-sim-chart role="img" aria-label="Solar production, home use and battery charge across 24 hours"></svg>
-          <label class="sr-only" for="simRange">Time of day</label>
-          <input class="scrub" id="simRange" type="range" min="0" max="287" step="1" value="144" data-sim-range>
-          <div class="chart__legend" aria-hidden="true">
-            <span class="lg lg--solar">Solar production</span>
-            <span class="lg lg--home">Home use</span>
-            <span class="lg lg--batt">Battery charge</span>
+      <div class="sim">
+        <div class="sim__top">
+          <div class="sim__clock">
+            <p class="sim__time" data-sim-time>12:00</p>
+            <p class="sim__phase" data-sim-phase>Midday sun</p>
+            <button class="sim__play" type="button" data-sim-play aria-pressed="false">
+              <svg class="i-play" aria-hidden="true"><use href="#i-play"/></svg>
+              <svg class="i-pause" aria-hidden="true"><use href="#i-pause"/></svg>
+              <span data-sim-play-label>Play the day</span>
+            </button>
+          </div>
+          <div class="sim__sky" data-sim-sky data-cursor="Drag">
+            <svg class="sim__arc" data-sim-arc aria-hidden="true"></svg>
+            <label class="sr-only" for="simRange">Time of day</label>
+            <input class="sim__range" id="simRange" type="range" min="0" max="287" step="1" value="144" data-sim-range>
+            <span class="sim__sun" data-sim-sun aria-hidden="true"></span>
           </div>
         </div>
 
-        <ul class="flows">
-          <li class="flow flow--solar">
-            <span class="flow__label">Panels</span>
-            <span class="flow__value"><b data-flow="solar">0.0</b> kW</span>
-            <span class="flow__state" data-flow-state="solar">Generating</span>
-          </li>
-          <li class="flow flow--home">
-            <span class="flow__label">Home</span>
-            <span class="flow__value"><b data-flow="home">0.0</b> kW</span>
-            <span class="flow__state" data-flow-state="home">In use</span>
-          </li>
-          <li class="flow flow--batt">
-            <span class="flow__label">Battery</span>
-            <span class="flow__value"><b data-flow="soc">0</b> %</span>
-            <span class="flow__state" data-flow-state="batt">Idle</span>
-            <span class="flow__meter" aria-hidden="true"><i data-flow-meter></i></span>
-          </li>
-          <li class="flow flow--grid">
-            <span class="flow__label">Grid</span>
-            <span class="flow__value"><b data-flow="grid">0.0</b> kW</span>
-            <span class="flow__state" data-flow-state="grid">No exchange</span>
-          </li>
-        </ul>
+        <div class="sim__mid">
+          <svg class="flow" viewBox="0 0 560 322" role="img" aria-label="Energy flow between panels, home, battery and grid" data-flow>
+            <g class="flow__lines">
+              <path class="flow__base" d="M120 70C200 70 200 150 246 150"/>
+              <path class="flow__base" d="M314 150C360 150 360 70 440 70"/>
+              <path class="flow__base" d="M120 230C200 230 200 150 246 150"/>
+              <path class="flow__base" d="M314 150C360 150 360 230 440 230"/>
+              <path class="flow__run" data-run="pv" d="M120 70C200 70 200 150 246 150"/>
+              <path class="flow__run" data-run="home" d="M314 150C360 150 360 70 440 70"/>
+              <path class="flow__run" data-run="batt" d="M120 230C200 230 200 150 246 150"/>
+              <path class="flow__run" data-run="grid" d="M314 150C360 150 360 230 440 230"/>
+            </g>
+            <g class="node" data-node="pv" transform="translate(80 70)">
+              <circle r="36"/>
+              <path class="node__icon" d="M-14-9h28l5 18h-38zM-4.6-9l-1.7 18M4.6-9l1.7 18M-16.4 0h32.8"/>
+              <text class="node__name" y="58">Panels</text><text class="node__val" y="78" data-node-val="pv">0.0 kW</text>
+            </g>
+            <g class="node" data-node="home" transform="translate(480 70)">
+              <circle r="36"/>
+              <path class="node__icon" d="M-15 1 0-12 15 1M-11-2v14h22V-2M-3 12V4h6v8"/>
+              <text class="node__name" y="58">Home</text><text class="node__val" y="78" data-node-val="home">0.0 kW</text>
+            </g>
+            <g class="node" data-node="batt" transform="translate(80 230)">
+              <circle r="36"/>
+              <path class="node__icon" d="M-8-15h16v30h-16zM-3-18h6"/>
+              <rect class="node__fill" x="-6" y="-13" width="12" height="26" data-batt-fill/>
+              <text class="node__name" y="58">Battery</text><text class="node__val" y="78" data-node-val="batt">0%</text>
+            </g>
+            <g class="node" data-node="grid" transform="translate(480 230)">
+              <circle r="36"/>
+              <path class="node__icon" d="M0-16-9 16M0-16 9 16M-6.5 6h13M-4.5-2h9M-12-10h24"/>
+              <text class="node__name" y="58">Grid</text><text class="node__val" y="78" data-node-val="grid">0.0 kW</text>
+            </g>
+            <g class="node node--hub" transform="translate(280 150)">
+              <rect x="-34" y="-30" width="68" height="60" rx="10"/>
+              <path class="node__icon" d="M-14 0c4.7-8 9.3-8 14 0s9.3 8 14 0"/>
+              <text class="node__name" y="52">Inverter</text>
+            </g>
+          </svg>
+
+          <div class="sim__chart">
+            <svg class="chart" data-sim-chart role="img" aria-label="Solar production, home use and battery charge across 24 hours"></svg>
+            <div class="chart__legend" aria-hidden="true">
+              <span class="lg lg--solar">Solar production</span>
+              <span class="lg lg--home">Home use</span>
+              <span class="lg lg--batt">Battery charge</span>
+            </div>
+          </div>
+        </div>
 
         <dl class="totals">
           <div><dt>Generated today</dt><dd><span data-total="gen">0</span> kWh</dd></div>
@@ -327,158 +421,185 @@
     </div>
   </section>
 
-  <!-- ============ PROJECTS ============ -->
-  <section class="projects" id="projects" data-section="projects" data-rail-title="Installed and working">
+  <!-- ============ 16:30 PROJECTS ============ -->
+  <section class="projects" id="projects" data-scene data-time="990" data-label="Projects">
     <div class="wrap">
-      <div class="projects__head">
-        <h2 class="rule-title"><span>Installed, measured, still performing.</span></h2>
-      </div>
+      <header class="sec-head">
+        <p class="eyebrow eyebrow--line">16:30 · Projects</p>
+        <h2 data-split>Installed, measured, still performing.</h2>
+      </header>
       <div class="project-grid">
-        <article class="project">
-          <header class="project__top"><span class="tag">Home</span><span class="project__year">2025</span></header>
-          <h3>Courtyard House</h3>
-          <p class="project__big"><b>9.6</b> kW <span>+ 13.5 kWh battery</span></p>
-          <figure class="spark">
-            <svg viewBox="0 0 200 64" preserveAspectRatio="none" data-spark="day" aria-hidden="true"></svg>
-            <figcaption>Production on a typical day</figcaption>
-          </figure>
-          <dl class="project__facts">
-            <div><dt>Self-powered</dt><dd>94%</dd></div>
-            <div><dt>On site</dt><dd>2 days</dd></div>
-          </dl>
+        <article class="project" data-tilt-card>
+          <div class="project__media" data-wipe><img src="assets/img/home-solar-roof.webp" alt="Courtyard House: a brick home with a black solar roof" width="1000" height="1500" loading="lazy"></div>
+          <div class="project__body">
+            <header class="project__top"><span class="tag">Home</span><span class="project__year">2025</span></header>
+            <h3>Courtyard House</h3>
+            <p class="project__big"><b data-count="9.6" data-decimals="1">9.6</b> kW <span>+ 13.5 kWh battery</span></p>
+            <figure class="spark"><svg viewBox="0 0 200 64" preserveAspectRatio="none" data-spark="day" aria-hidden="true"></svg><figcaption>Production on a typical day</figcaption></figure>
+            <dl class="project__facts"><div><dt>Self-powered</dt><dd>94%</dd></div><div><dt>On site</dt><dd>2 days</dd></div></dl>
+          </div>
         </article>
-        <article class="project">
-          <header class="project__top"><span class="tag">Business</span><span class="project__year">2024</span></header>
-          <h3>Harbour Depot</h3>
-          <p class="project__big"><b>240</b> kW <span>rooftop array</span></p>
-          <figure class="spark">
-            <svg viewBox="0 0 200 64" preserveAspectRatio="none" data-spark="months" aria-hidden="true"></svg>
-            <figcaption>Generation by month</figcaption>
-          </figure>
-          <dl class="project__facts">
-            <div><dt>Per year</dt><dd>312 MWh</dd></div>
-            <div><dt>Grid spend</dt><dd>−38%</dd></div>
-          </dl>
+        <article class="project" data-tilt-card>
+          <div class="project__media" data-wipe><img src="assets/img/business-rooftop.webp" alt="Harbour Depot: rows of panels across a warehouse roof" width="1400" height="947" loading="lazy"></div>
+          <div class="project__body">
+            <header class="project__top"><span class="tag">Business</span><span class="project__year">2024</span></header>
+            <h3>Harbour Depot</h3>
+            <p class="project__big"><b data-count="240">240</b> kW <span>rooftop array</span></p>
+            <figure class="spark"><svg viewBox="0 0 200 64" preserveAspectRatio="none" data-spark="months" aria-hidden="true"></svg><figcaption>Generation by month</figcaption></figure>
+            <dl class="project__facts"><div><dt>Per year</dt><dd>312 MWh</dd></div><div><dt>Grid spend</dt><dd>−38%</dd></div></dl>
+          </div>
         </article>
-        <article class="project">
-          <header class="project__top"><span class="tag">Business</span><span class="project__year">2025</span></header>
-          <h3>Palm Row Clinic</h3>
-          <p class="project__big"><b>48</b> kW <span>+ 60 kWh backup</span></p>
-          <figure class="spark">
-            <svg viewBox="0 0 200 64" preserveAspectRatio="none" data-spark="soc" aria-hidden="true"></svg>
-            <figcaption>Battery charge on a typical day</figcaption>
-          </figure>
-          <dl class="project__facts">
-            <div><dt>Backup</dt><dd>9 hours</dd></div>
-            <div><dt>Outages felt</dt><dd>0</dd></div>
-          </dl>
+        <article class="project" data-tilt-card>
+          <div class="project__media" data-wipe><img src="assets/img/commercial-dusk.webp" alt="Palm Row Clinic: a glass building behind ground-mounted panels" width="1600" height="1067" loading="lazy"></div>
+          <div class="project__body">
+            <header class="project__top"><span class="tag">Business</span><span class="project__year">2025</span></header>
+            <h3>Palm Row Clinic</h3>
+            <p class="project__big"><b data-count="48">48</b> kW <span>+ 60 kWh backup</span></p>
+            <figure class="spark"><svg viewBox="0 0 200 64" preserveAspectRatio="none" data-spark="soc" aria-hidden="true"></svg><figcaption>Battery charge on a typical day</figcaption></figure>
+            <dl class="project__facts"><div><dt>Backup</dt><dd>9 hours</dd></div><div><dt>Outages felt</dt><dd>0</dd></div></dl>
+          </div>
         </article>
       </div>
     </div>
   </section>
 
-  <!-- ============ CARE ============ -->
-  <section class="care" id="care" data-section="care" data-rail-title="Care in every connection">
-    <div class="care__media" aria-hidden="true">
-      <img class="is-active" data-care-img="assess" src="assets/img/care-assess.webp" alt="" width="1400" height="934" loading="lazy">
-      <img data-care-img="design" src="assets/img/care-design.webp" alt="" width="1400" height="933" loading="lazy">
-      <img data-care-img="install" src="assets/img/care-install.webp" alt="" width="1400" height="1050" loading="lazy">
-      <img data-care-img="support" src="assets/img/care-support.webp" alt="" width="1400" height="784" loading="lazy">
-    </div>
-    <div class="wrap care__wrap">
-      <div class="care__copy">
-        <h2>Care in every connection.</h2>
-        <div class="tabs" role="tablist" aria-label="How we work">
-          <span class="tabs__ink" aria-hidden="true"></span>
-          <button class="tab" role="tab" id="tab-assess" aria-selected="true" aria-controls="panel-assess" data-tab="assess">Assess</button>
-          <button class="tab" role="tab" id="tab-design" aria-selected="false" aria-controls="panel-design" data-tab="design" tabindex="-1">Design</button>
-          <button class="tab" role="tab" id="tab-install" aria-selected="false" aria-controls="panel-install" data-tab="install" tabindex="-1">Install</button>
-          <button class="tab" role="tab" id="tab-support" aria-selected="false" aria-controls="panel-support" data-tab="support" tabindex="-1">Support</button>
+  <!-- ============ 18:00 SUNSET ============ -->
+  <section class="sunset" id="sunset" data-scene data-time="1080" data-label="Sunset" data-dark-from="0.55">
+    <div class="sunset__sticky">
+      <div class="sunset__sky"></div>
+      <div class="sunset__stars" data-stars-static></div>
+      <div class="sunset__sun"></div>
+      <div class="sunset__ground"></div>
+      <div class="wrap sunset__copy">
+        <p class="sunset__time" data-sunset-time>18:00</p>
+        <div class="sunset__lines">
+          <h2 class="sunset__line sunset__line--a">The sun goes down.</h2>
+          <h2 class="sunset__line sunset__line--b">Your lights stay on.</h2>
         </div>
-        <div class="tabpanels">
-          <div class="tabpanel" role="tabpanel" id="panel-assess" aria-labelledby="tab-assess">
-            <p class="tabpanel__when">Day 1 · a 90-minute visit</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 19:30 CARE (night) ============ -->
+  <section class="care tone-night" id="care" data-scene data-time="1170" data-label="Care" data-dark>
+    <div class="wrap care__grid">
+      <div class="care__sticky">
+        <div class="care__frame">
+          <img class="is-active" data-care-img="assess" src="assets/img/care-assess.webp" alt="" width="1400" height="934" loading="lazy">
+          <img data-care-img="design" src="assets/img/care-design.webp" alt="" width="1400" height="933" loading="lazy">
+          <img data-care-img="install" src="assets/img/care-install.webp" alt="" width="1400" height="1050" loading="lazy">
+          <img data-care-img="support" src="assets/img/care-support.webp" alt="" width="1400" height="784" loading="lazy">
+        </div>
+        <p class="care__counter" aria-hidden="true"><span data-care-num>01</span> / 04</p>
+      </div>
+
+      <div class="care__steps">
+        <header class="care__head">
+          <p class="eyebrow eyebrow--line">19:30 · Care</p>
+          <h2 data-split>Care in every connection.</h2>
+        </header>
+        <div class="care__list">
+          <span class="care__line" aria-hidden="true"><i data-care-line></i></span>
+          <article class="cstep is-active" data-care="assess">
+            <img class="cstep__img" src="assets/img/care-assess.webp" alt="An electrician in a hard hat testing a meter" width="1400" height="934" loading="lazy">
+            <span class="cstep__num">01</span>
+            <h3>Assess</h3>
+            <p class="cstep__when">Day 1 · a 90-minute visit</p>
             <p>A surveyor checks your roof, wiring and meter, and reads twelve months of your bills so the plan starts from how you really use power.</p>
-          </div>
-          <div class="tabpanel" role="tabpanel" id="panel-design" aria-labelledby="tab-design" hidden>
-            <p class="tabpanel__when">Week 1 · a fixed quote</p>
+          </article>
+          <article class="cstep" data-care="design">
+            <img class="cstep__img" src="assets/img/care-design.webp" alt="A designer drawing a system layout on paper" width="1400" height="933" loading="lazy">
+            <span class="cstep__num">02</span>
+            <h3>Design</h3>
+            <p class="cstep__when">Week 1 · a fixed quote</p>
             <p>We model your roof’s sun hours, then size the panels and battery. You get a layout and a payback estimate you can check line by line.</p>
-          </div>
-          <div class="tabpanel" role="tabpanel" id="panel-install" aria-labelledby="tab-install" hidden>
-            <p class="tabpanel__when">Weeks 3–6 · 1–2 days on site</p>
+          </article>
+          <article class="cstep" data-care="install">
+            <img class="cstep__img" src="assets/img/care-install.webp" alt="An installer placing a panel on a roof" width="1400" height="1050" loading="lazy">
+            <span class="cstep__num">03</span>
+            <h3>Install</h3>
+            <p class="cstep__when">Weeks 3–6 · 1–2 days on site</p>
             <p>One certified crew does the whole job. We handle the permits and the grid connection, then walk you through the app before we leave.</p>
-          </div>
-          <div class="tabpanel" role="tabpanel" id="panel-support" aria-labelledby="tab-support" hidden>
-            <p class="tabpanel__when">Ongoing · for 25 years</p>
+          </article>
+          <article class="cstep" data-care="support">
+            <img class="cstep__img" src="assets/img/care-support.webp" alt="Gloved hands servicing a solar panel" width="1400" height="784" loading="lazy">
+            <span class="cstep__num">04</span>
+            <h3>Support</h3>
+            <p class="cstep__when">Ongoing · for 25 years</p>
             <p>If output drops below what the weather says it should be, we see it first and send an engineer. Most fixes happen before you notice.</p>
-          </div>
+          </article>
         </div>
-        <a class="link-arrow" href="#contact">Meet the approach <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
       </div>
     </div>
   </section>
 
-  <!-- ============ CONTACT ============ -->
-  <section class="contact" id="contact" data-section="contact" data-rail-title="Let’s talk">
-    <div class="wrap contact__grid">
-      <div class="contact__intro">
-        <h2>Let’s make room for better power.</h2>
-        <p>Tell us about your property and we’ll help you plan a system that fits.</p>
-      </div>
+  <!-- ============ 21:00 CONTACT (night) ============ -->
+  <section class="contact tone-night" id="contact" data-scene data-time="1260" data-label="Let’s talk" data-dark>
+    <canvas class="stars" data-stars aria-hidden="true"></canvas>
+    <div class="wrap contact__wrap">
+      <header class="contact__head">
+        <p class="eyebrow eyebrow--line">21:00 · Night</p>
+        <p class="contact__status"><span class="pulse"></span>Battery at 64%. The house is running on stored sun.</p>
+        <h2 data-split>Let’s make room for better power.</h2>
+        <p class="contact__lede">Tell us about your property and we’ll help you plan a system that fits.</p>
+      </header>
 
-      <form class="form" id="assessForm" novalidate>
-        <div class="field">
-          <label for="f-name">Your name</label>
-          <input id="f-name" name="name" type="text" autocomplete="name" placeholder="Enter your name" required>
-          <p class="field__error" id="f-name-err">Add your name so we know who to ask for.</p>
-        </div>
-        <div class="field">
-          <label for="f-contact">Phone or email</label>
-          <input id="f-contact" name="contact" type="text" autocomplete="email" placeholder="Enter phone or email" required>
-          <p class="field__error" id="f-contact-err">Enter a phone number or an email address.</p>
-        </div>
-        <div class="field">
-          <label for="f-type">Property type</label>
-          <div class="select">
-            <select id="f-type" name="type" required>
-              <option value="" selected disabled>Select an option</option>
-              <option>Home</option>
-              <option>Business</option>
-              <option>Farm or land</option>
-              <option>Something else</option>
-            </select>
+      <div class="contact__grid">
+        <form class="form" id="assessForm" novalidate>
+          <div class="field">
+            <label for="f-name">Your name</label>
+            <input id="f-name" name="name" type="text" autocomplete="name" placeholder="Enter your name" required>
+            <p class="field__error" id="f-name-err">Add your name so we know who to ask for.</p>
           </div>
-          <p class="field__error" id="f-type-err">Choose the closest match.</p>
-        </div>
-        <div class="field field--wide">
-          <label for="f-msg">Tell us about your project</label>
-          <textarea id="f-msg" name="message" rows="2" placeholder="A few details about your property, goals or timing."></textarea>
-        </div>
-        <div class="form__foot">
-          <button class="btn btn--dark" type="submit">Request an assessment <svg aria-hidden="true"><use href="#i-arrow"/></svg></button>
-          <p class="form__done" id="formDone" role="status" aria-live="polite"></p>
-        </div>
-      </form>
+          <div class="field">
+            <label for="f-contact">Phone or email</label>
+            <input id="f-contact" name="contact" type="text" autocomplete="email" placeholder="Enter phone or email" required>
+            <p class="field__error" id="f-contact-err">Enter a phone number or an email address.</p>
+          </div>
+          <div class="field">
+            <label for="f-type">Property type</label>
+            <div class="select">
+              <select id="f-type" name="type" required>
+                <option value="" selected disabled>Select an option</option>
+                <option>Home</option>
+                <option>Business</option>
+                <option>Farm or land</option>
+                <option>Something else</option>
+              </select>
+            </div>
+            <p class="field__error" id="f-type-err">Choose the closest match.</p>
+          </div>
+          <div class="field field--wide">
+            <label for="f-msg">Tell us about your project</label>
+            <textarea id="f-msg" name="message" rows="3" placeholder="A few details about your property, goals or timing."></textarea>
+          </div>
+          <div class="form__foot">
+            <button class="btn btn--sun" type="submit" data-magnetic>Request an assessment <svg aria-hidden="true"><use href="#i-arrow"/></svg></button>
+            <p class="form__done" id="formDone" role="status" aria-live="polite"></p>
+          </div>
+        </form>
 
-      <div class="faq">
-        <details>
-          <summary>Where should I start? <svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
-          <p>Send the form with your last few electricity bills to hand. We’ll book a site assessment and you’ll have a fixed quote within a week.</p>
-        </details>
-        <details>
-          <summary>Can I upgrade my current system? <svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
-          <p>Usually, yes. Most existing panels can take a battery, and many inverters can take more panels. We check yours on the first visit.</p>
-        </details>
-        <details>
-          <summary>What happens in a power cut? <svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
-          <p>With a battery, your home switches over in milliseconds and keeps running. Without one, grid-tied panels shut down for the safety of line workers.</p>
-        </details>
+        <div class="faq">
+          <details>
+            <summary>Where should I start? <svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
+            <p>Send the form with your last few electricity bills to hand. We’ll book a site assessment and you’ll have a fixed quote within a week.</p>
+          </details>
+          <details>
+            <summary>Can I upgrade my current system? <svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
+            <p>Usually, yes. Most existing panels can take a battery, and many inverters can take more panels. We check yours on the first visit.</p>
+          </details>
+          <details>
+            <summary>What happens in a power cut? <svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
+            <p>With a battery, your home switches over in milliseconds and keeps running. Without one, grid-tied panels shut down for the safety of line workers.</p>
+          </details>
+        </div>
       </div>
     </div>
   </section>
 </main>
 
-<footer class="footer">
+<footer class="footer tone-night" data-scene data-time="1320" data-label="Goodnight" data-dark>
+  <p class="wordmark" aria-hidden="true" data-wordmark data-text="solar">solar</p>
   <div class="wrap footer__inner">
     <a class="brand brand--footer" href="#top" aria-label="Solar, back to top">
       <svg class="brand__mark" aria-hidden="true"><use href="#i-sun"/></svg>
@@ -495,6 +616,11 @@
   </div>
 </footer>
 
-<script src="js/main.js"></script>
+<script src="js/vendor/gsap.min.js"></script>
+<script src="js/vendor/ScrollTrigger.min.js"></script>
+<script src="js/vendor/lenis.min.js"></script>
+<script src="js/core.js"></script>
+<script src="js/scenes.js"></script>
+<script src="js/motion.js"></script>
 </body>
 </html>
