@@ -1,75 +1,68 @@
 # Solar
 
-Marketing site for a solar installation, battery storage and long-term care company.
+Marketing site for a solar company: panels, home batteries, EV charging, and long-term care for homes and businesses.
 Plain HTML, CSS and JavaScript. No build step. The animation libraries ship inside the repo, so the site works without any CDN.
 
 ## Run it
-
-Open `index.html` in a browser, or serve the folder:
 
 ```bash
 python3 -m http.server 8000
 # then visit http://localhost:8000
 ```
 
-## The idea: one scroll is one day
+## Design
 
-Scrolling the page is living through a single day, from 05:50 to 22:00.
+- **Look:** dark, cinematic and built around real photography. The palette is a solar cell at dusk, blue-black glass with aluminium greys, lit by one warm sunlight accent. One light "daylight" section (How it works) breaks up the dark.
+- **Type:** Archivo set wide for headlines, Geist for text, and Geist Mono for small labels.
+- **Signature effect:** photos change by switching on cell by cell, like a panel catching the sun. Each cell scales in carrying its slice of the next photo, with a flash of sunlight. The same effect opens the page and runs the hero slideshow and the How it works frame.
 
-- The colour of the sky behind the page changes with the hour.
-- A soft sun glow rises, crosses the screen and sets as you scroll.
-- The sun in the navigation travels its arc in step with the page.
-- Each section is stamped with its time of day, and the rail on the left keeps the clock.
-- The page ends at night, with the house still running on its battery.
+## Sections
 
-## Sections, in scroll order
+| Section | What it does |
+| --- | --- |
+| **Header** | Transparent over the hero, turns to frosted glass on scroll, and hides while you read down. **Solutions** opens a menu with photo cards. A small chip shows whether the sun is up near you. On phones there's a full-screen menu. |
+| **Hero** | Full-screen slideshow of four real photos with the cell transition, a slow zoom and progress bars you can click. Scrolling shrinks the photo into a rounded frame. |
+| **Trust bar** | 25-year warranty, 1–2 days on site, 24/7 monitoring, one crew. |
+| **Statement** | The words light up as you scroll, the counters count up, and an installer photo wipes in with parallax. |
+| **What we do** | Four expanding photo panels: Solar panels, Battery storage, EV charging, Care & monitoring. |
+| **Homes / Business** | Split screen. The half you point at grows and shows its details. The Homes and Business nav links open the matching half. |
+| **How it works** | Pinned on wide screens. Assess → Design → Install → Power on, with the photo frame switching cell by cell. Elsewhere the steps stack. |
+| **System sizer** | Sliders for monthly use, sun hours and backup hours. It shows system size, panel count, roof space, battery, yearly output and CO₂ avoided, and a roof that lights up panel by panel. Sun hours default to an estimate for the visitor's area. |
+| **Projects** | Vertical scroll drives a horizontal gallery, with parallax and a skew that follows scroll speed. On phones it becomes a swipeable row. |
+| **Marquee** | A giant word band that speeds up with scrolling. |
+| **Contact** | Quote form over a sunset photo, plus FAQs. |
+| **Footer** | A giant "solar" wordmark filled with an aerial photo of solar rows, plus links and today's sunrise and sunset near the visitor. |
 
-| Time | Section | What happens |
-| --- | --- | --- |
-| — | **Intro** | A loader charges the sunburst logo from 000 to 100, then splits open along a slanted cut. The nav drops in, the headline rises word by word, and the photo unfolds like a brochure. |
-| 05:50 | **Hero** | A 3D folded triptych that tilts with the mouse. Scrolling pins it, flattens the folds and opens it into a full-width “One home. One day.” frame. |
-| 07:30 | **Statement** | The words light up as you read. The three counters count up. |
-| 09:00 | **How it works** | Pinned canvas story. Sunlight particles hit the roof panels and pulses run down the wires. The battery fills, the sun sets, stars come out and the windows light up. The steps and live readouts follow your scroll. |
-| — | **Marquee** | Giant “Capture ✳ Store ✳ Use ✳ Care” band. It speeds up and leans with scroll speed. |
-| 12:00 | **Systems** | Vertical scroll drives a horizontal track of five cards, with image parallax and an animated battery drawing. On phones it becomes a swipeable row. |
-| 14:30 | **Your roof today** | A clear-day energy model for the visitor's own location. Drag the sun along the sky arc. The sky changes colour, energy flows animate between panels, inverter, home, battery and grid, and the chart cursor follows. On first view, the sun sweeps from midnight to the current time. |
-| 16:30 | **Projects** | Staggered cards with wipe-in photos, counting numbers, drawn charts and 3D hover tilt. |
-| 18:00 | **Sunset** | A pinned scene. The sky scrolls through the sunset colours, a huge sun sinks below the horizon, “The sun goes down.” turns into “Your lights stay on.” and the stars appear. |
-| 19:30 | **Care** | Night section. A sticky photo frame wipes between Assess, Design, Install and Support as each step reaches the middle of the screen. |
-| 21:00 | **Contact** | Twinkling star field with occasional shooting stars, the form and the FAQs. |
-| 22:00 | **Footer** | A giant “solar” wordmark fills with sun yellow as you reach the bottom. |
-
-Across the page there's smooth scrolling, magnetic buttons, a custom cursor on desktop (it reads “Drag” over the simulator) and a film-grain overlay.
+Across the page there's smooth scrolling, magnetic buttons, and a custom cursor on desktop that shows "View" over projects and "Drag" over sliders.
 
 ## Accessibility and fallbacks
 
-- **Reduced motion:** visitors who ask for reduced motion get no loader, smooth scrolling, pinning or scrubbing. Every section shows in place, and the simulator still works.
-- **If the scripts fail:** the HTML and CSS are complete on their own. Failsafes hide the loader and reveal the intro elements after a few seconds.
-- **Keyboard and screen readers:** the simulator is driven by a native range input, so it works with the keyboard and announces the time and values. The custom cursor only appears with a mouse.
-
-## Sun times
-
-The simulator and the footer use the visitor's own sunrise and sunset. These come from the browser's time zone, so there's no location prompt. The calculation is the NOAA solar-position approximation in `js/core.js`. The page's own narrative day uses a fixed sunrise of 06:10 and sunset of 18:30.
+- **Reduced motion:** visitors who ask for reduced motion get every section in place, with no intro, pinning or slideshow autoplay.
+- **If the scripts fail:** the HTML and CSS still make a complete page.
+- **Keyboard:** everything works from the keyboard, including the menus, panels, split halves, sliders and form.
 
 ## Files
 
 ```
 index.html
 css/styles.css
-js/core.js        page clock, sun-path nav, simulator, care steps, form
-js/scenes.js      canvas scenes: photon story, night sky, sunset stars
-js/motion.js      GSAP / ScrollTrigger / Lenis choreography
-js/vendor/        gsap 3.12.5, ScrollTrigger 3.12.5, lenis 1.1.13
-assets/img/       photos (WebP)
+js/core.js     header and menus, slideshow, panels, split, process steps, sizer, form, sun estimate
+js/motion.js   GSAP / ScrollTrigger / Lenis: cell transition, intro, pins, reveals, cursor
+js/vendor/     gsap 3.12.5, ScrollTrigger 3.12.5, lenis 1.1.13
+assets/img/    photos (WebP)
 ```
 
 ## Before going live
 
-- **Form:** `js/core.js` → section 10 only validates and shows a thank-you message. Connect the `TODO` to your CRM or email service.
-- **Copy and figures:** the project names and numbers, the service specs, the FAQ answers and the stats are placeholders. Replace them with real ones.
+- **Form:** `js/core.js` → section 8 only validates and shows a thank-you message. Connect the `TODO` to your CRM or email service.
+- **Content:** the project names and sizes, the stats, the service specs and the FAQ answers are placeholders. Replace them with your real ones.
+- **Photos:** these are Unsplash stock photos of real installations. Swap in photos of your own jobs when you have them, using the same file names.
 
 ## Credits
 
-- [GSAP](https://gsap.com) and ScrollTrigger, under the GSAP Standard License.
-- [Lenis](https://github.com/darkroomengineering/lenis), MIT.
-- Photos from [Unsplash](https://unsplash.com), under the Unsplash License: `photo-1600585154340` (hero house), `photo-1605980413988` (house with solar roof), `photo-1613665813446` (warehouse rooftop), `photo-1611365892117` (office and solar field), `photo-1621905251189` (electrician), `photo-1581092160562` (drawing plans), `photo-1624397640148` (roof install), `photo-1559302504` (panel maintenance). Swap in your own project photos when you have them.
+- [GSAP](https://gsap.com) and ScrollTrigger, under the GSAP Standard License. [Lenis](https://github.com/darkroomengineering/lenis), MIT.
+- Photos from [Unsplash](https://unsplash.com), under the Unsplash License. IDs:
+  1782297040435, 1630608354129, 1660330589243, 1730807908064, 1700529289398, 1780445392792, 1780445392417,
+  1766507680004, 1726221062415, 1637417494521, 1617269778723, 1660330589257, 1581092160562, 1624397640148,
+  1655300283246, 1586366461834, 1777919407084, 1694327671725, 1780445392692, 1698752822107, 1780445392628,
+  1698752821934, 1723133371535.
