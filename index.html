@@ -35,7 +35,6 @@
 </svg>
 
 <a class="skip" href="#main">Skip to content</a>
-<div class="cursor" aria-hidden="true"><div class="cursor__ring"><span class="cursor__label"></span></div><div class="cursor__dot"></div></div>
 
 <!-- ================= HEADER: the sun-map island =================
      A floating glass pill. The logo's eight rays stand for the page's eight
@@ -340,17 +339,17 @@
 
         <div class="ctrl">
           <div class="ctrl__top"><label for="useRange">Electricity you use per month</label><output for="useRange" data-out="use">450 kWh</output></div>
-          <input class="range" id="useRange" type="range" min="100" max="2000" step="10" value="450" data-in="use" data-cursor="Drag">
+          <input class="range" id="useRange" type="range" min="100" max="2000" step="10" value="450" data-in="use">
           <div class="ctrl__scale"><span>100</span><span>2,000 kWh</span></div>
         </div>
         <div class="ctrl">
           <div class="ctrl__top"><label for="sunRange">Peak sun hours a day</label><output for="sunRange" data-out="sun">5.0 h</output></div>
-          <input class="range" id="sunRange" type="range" min="3" max="7" step="0.5" value="5" data-in="sun" data-cursor="Drag">
+          <input class="range" id="sunRange" type="range" min="3" max="7" step="0.5" value="5" data-in="sun">
           <div class="ctrl__scale"><span>3 h</span><span data-sun-hint>Estimated for your area</span><span>7 h</span></div>
         </div>
         <div class="ctrl">
           <div class="ctrl__top"><label for="backupRange">Backup after dark</label><output for="backupRange" data-out="backup">5 h</output></div>
-          <input class="range" id="backupRange" type="range" min="0" max="12" step="1" value="5" data-in="backup" data-cursor="Drag">
+          <input class="range" id="backupRange" type="range" min="0" max="12" step="1" value="5" data-in="backup">
           <div class="ctrl__scale"><span>None</span><span>12 h</span></div>
         </div>
       </div>
@@ -386,23 +385,23 @@
       </div>
       <div class="rail" data-rail>
         <div class="rail__track" data-rail-track>
-          <article class="proj" data-cursor="View">
+          <article class="proj">
             <div class="proj__img"><img src="assets/img/proj-villa.webp" alt="A white villa under construction with solar panels on its roof, among palm trees" width="1400" height="2100" loading="lazy"></div>
             <div class="proj__meta"><h3>Palm Court Villa</h3><p>Home · new build</p><b>12 kW + 20 kWh</b></div>
           </article>
-          <article class="proj proj--wide" data-cursor="View">
+          <article class="proj proj--wide">
             <div class="proj__img"><img src="assets/img/proj-warehouse.webp" alt="Rows of blue solar panels across the ridge of a metal warehouse roof" width="1400" height="1050" loading="lazy"></div>
             <div class="proj__meta"><h3>Eastside Logistics</h3><p>Business · warehouse roof</p><b>320 kW</b></div>
           </article>
-          <article class="proj" data-cursor="View">
+          <article class="proj">
             <div class="proj__img"><img src="assets/img/proj-tile.webp" alt="Solar panels on a terracotta tiled family-home roof" width="1400" height="1050" loading="lazy"></div>
             <div class="proj__meta"><h3>Hillcrest Home</h3><p>Home · retrofit</p><b>6.6 kW</b></div>
           </article>
-          <article class="proj proj--wide" data-cursor="View">
+          <article class="proj proj--wide">
             <div class="proj__img"><img src="assets/img/proj-farm.webp" alt="A large ground-mounted solar park under a dramatic sunset sky" width="1400" height="1050" loading="lazy"></div>
             <div class="proj__meta"><h3>Ridgeline Solar Park</h3><p>Utility · ground-mount</p><b>4.8 MW</b></div>
           </article>
-          <article class="proj" data-cursor="View">
+          <article class="proj">
             <div class="proj__img"><img src="assets/img/proj-rooftop.webp" alt="Close view of rows of solar panels on an office rooftop in warm light" width="1400" height="933" loading="lazy"></div>
             <div class="proj__meta"><h3>Northgate Offices</h3><p>Business · rooftop</p><b>180 kW</b></div>
           </article>

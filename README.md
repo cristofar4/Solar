@@ -33,7 +33,7 @@ python3 -m http.server 8000
 | **Contact** | Quote form over a sunset photo, plus FAQs. |
 | **Footer** | A giant "solar" wordmark filled with an aerial photo of solar rows, plus links and today's sunrise and sunset near the visitor. |
 
-Across the page there's smooth scrolling, magnetic buttons, and a custom cursor on desktop that shows "View" over projects and "Drag" over sliders.
+Across the page there is smooth scrolling and magnetic buttons. The mouse is the normal pointer, with the hand cursor on everything you can click or drag.
 
 ## Accessibility and fallbacks
 

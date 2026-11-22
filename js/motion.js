@@ -8,7 +8,7 @@
    4. Hero scroll-out
    5. Pinned scenes: process, projects rail
    6. Reveals, parallax, counters
-   7. Marquee, magnetic buttons, cursor
+   7. Marquee and magnetic buttons
    ========================================================================= */
 (() => {
   'use strict';
@@ -332,26 +332,6 @@
       el.addEventListener('pointerleave', () => { xTo(0); yTo(0); });
     });
 
-    root.classList.add('has-cursor');
-    const cur = $('.cursor'), dot = $('.cursor__dot'), ring = $('.cursor__ring'), label = $('.cursor__label');
-    const dx = gsap.quickTo(dot, 'x', { duration: 0.1 }), dy = gsap.quickTo(dot, 'y', { duration: 0.1 });
-    const rx = gsap.quickTo(ring, 'x', { duration: 0.5, ease: 'power3' }), ry = gsap.quickTo(ring, 'y', { duration: 0.5, ease: 'power3' });
-    gsap.set([dot, ring], { x: -100, y: -100 });
-    window.addEventListener('pointermove', (e) => { dx(e.clientX); dy(e.clientY); rx(e.clientX); ry(e.clientY); });
-    document.addEventListener('pointerleave', () => cur.classList.add('is-hidden'));
-    document.addEventListener('pointerenter', () => cur.classList.remove('is-hidden'));
-    document.addEventListener('pointerover', (e) => {
-      const t = e.target;
-      const lab = t.closest('[data-cursor]');
-      const hot = t.closest('a, button, summary, .choices label, [tabindex]');
-      const field = t.closest('input[type="text"], textarea');
-      cur.classList.toggle('has-label', !!lab);
-      cur.classList.toggle('is-hover', !!hot && !lab);
-      cur.classList.toggle('is-hidden', !!field);
-      label.textContent = lab ? lab.dataset.cursor : '';
-    });
-    document.addEventListener('pointerdown', () => gsap.to(ring, { scale: 0.8, duration: 0.2 }));
-    document.addEventListener('pointerup', () => gsap.to(ring, { scale: 1, duration: 0.4, ease: 'back.out(3)' }));
   }
 
   /* ---------------------------------------------------------------- boot */
