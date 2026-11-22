@@ -66,10 +66,12 @@
   function paintSun() {
     const d = new Date(), now = d.getHours() * 60 + d.getMinutes();
     const up = now > sun.rise && now < sun.set;
-    const chip = $('[data-sunchip]');
-    if (chip) {
-      chip.classList.toggle('is-night', !up);
-      $('[data-sunchip-text]', chip).textContent = (up ? 'Sun’s up near you · ' : 'After sunset near you · ') + hhmm(now);
+    // the sun-map's core is solid while the sun is up near the visitor, a ring after sunset
+    const hd = document.getElementById('header');
+    if (hd) {
+      hd.classList.toggle('is-night', !up);
+      const b = hd.querySelector('.brand');
+      if (b) b.title = (up ? 'Sun’s up near you' : 'After sunset near you') + ' · each ray is a section of this page';
     }
     $$('[data-sun-times]').forEach((el) => { el.textContent = 'Sunrise ' + hhmm(sun.rise) + ' · Sunset ' + hhmm(sun.set) + ' (estimated from your time zone)'; });
   }
@@ -77,16 +79,109 @@
   setInterval(() => { sun = sunDay(new Date(), here.lat, here.lon); paintSun(); }, 60000);
   $$('[data-year]').forEach((el) => { el.textContent = String(new Date().getFullYear()); });
 
-  /* ---------------------------------------------------------------- 2 */
+  /* ---------------------------------------------------------------- 2
+     Header: the sun-map island. Eight rays, eight sections. */
   const header = $('#header');
+  const island = $('#island');
+  const mid = $('#islandMid');
+  const nav = $('.nav', island);
+  const navList = $('.nav__list', island);
+  const lamp = $('.nav__lamp', island);
   const megaBtn = $('#megaBtn');
   const mega = $('#mega');
   const burger = $('#burger');
   const menu = $('#menu');
-  // the header stays fixed on screen; it only gains a glass background once you scroll
-  function onScroll() { header.classList.toggle('is-solid', window.scrollY > 40); }
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
+  const rays = $$('.ray', island);
+  const nowNum = $('[data-now-num]');
+  const nowLabel = $('[data-now-label]');
+  const navLinks = $$('[data-for]', nav);
+  const sections = $$('[data-nav-label]');
+  const desk = window.matchMedia('(min-width: 1081px)');
+  const hoverable = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const NOW_W = 236;
+  let secs = [], cur = -1, scrolled = false, peek = false, peekTimer = 0;
+
+  // compact while scrolled, unless you're pointing at it, tabbing through it, or the menu is open
+  function layoutIsland() {
+    const compact = scrolled && !peek && mega.hidden;
+    header.classList.toggle('is-compact', compact);
+    if (desk.matches) mid.style.setProperty('--mid-w', (compact ? NOW_W : navList.scrollWidth + 2) + 'px');
+    else mid.style.removeProperty('--mid-w');
+  }
+  function setPeek(on) {
+    clearTimeout(peekTimer);
+    if (on) { peek = true; layoutIsland(); }
+    else peekTimer = setTimeout(() => { peek = false; layoutIsland(); }, 380);
+  }
+  [island, mega].forEach((el) => {
+    el.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') setPeek(true); });
+    el.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') setPeek(false); });
+  });
+  header.addEventListener('focusin', () => setPeek(true));
+  header.addEventListener('focusout', (e) => { if (!header.contains(e.relatedTarget)) setPeek(false); });
+
+  // a soft lamp glides under the link you point at
+  $$('.nav__link', nav).forEach((a) => {
+    const to = () => {
+      lamp.style.setProperty('--lx', a.offsetLeft + 'px');
+      lamp.style.setProperty('--lw', a.offsetWidth + 'px');
+      nav.classList.add('has-lamp');
+    };
+    a.addEventListener('pointerenter', to);
+    a.addEventListener('focus', to);
+  });
+  nav.addEventListener('pointerleave', () => nav.classList.remove('has-lamp'));
+  nav.addEventListener('focusout', (e) => { if (!nav.contains(e.relatedTarget)) nav.classList.remove('has-lamp'); });
+
+  function measureNav() {
+    secs = sections.map((el) => {
+      const box = el.parentElement && el.parentElement.classList.contains('pin-spacer') ? el.parentElement : el;
+      return { el, top: box.getBoundingClientRect().top + window.scrollY, label: el.dataset.navLabel };
+    });
+  }
+  function setNow(i, animate) {
+    nowNum.textContent = pad(i + 1);
+    const old = $('.now__text:not(.is-out)', nowLabel);
+    if (!animate && old) { old.textContent = secs[i].label; return; }
+    const nu = document.createElement('span');
+    nu.className = 'now__text is-in';
+    nu.textContent = secs[i].label;
+    nowLabel.appendChild(nu);
+    if (old) { old.classList.remove('is-in'); old.classList.add('is-out'); setTimeout(() => old.remove(), 450); }
+  }
+  function navTick() {
+    if (!secs.length) return;
+    const y = window.scrollY + window.innerHeight * 0.4;
+    let i = 0;
+    secs.forEach((s, k) => { if (y >= s.top) i = k; });
+    const next = secs[i + 1];
+    const end = next ? next.top : document.documentElement.scrollHeight - window.innerHeight * 0.6;
+    const p = clamp((y - secs[i].top) / Math.max(1, end - secs[i].top), 0, 1);
+    // passed sections are lit, the current one fills as you read it, the rest wait
+    rays.forEach((r, k) => {
+      r.style.setProperty('--off', k < i ? '0' : k === i ? (1 - Math.max(0.12, p)).toFixed(3) : '1');
+      r.classList.toggle('is-current', k === i);
+    });
+    if (i !== cur) {
+      setNow(i, cur !== -1);
+      cur = i;
+      const id = secs[i].el.id;
+      navLinks.forEach((a) => { if (a.dataset.for === id) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
+    }
+    const was = scrolled;
+    scrolled = window.scrollY > 120;
+    if (was !== scrolled) layoutIsland();
+  }
+  let navTicking = false;
+  window.addEventListener('scroll', () => {
+    if (navTicking) return;
+    navTicking = true;
+    requestAnimationFrame(() => { navTicking = false; navTick(); });
+  }, { passive: true });
+  SOLAR.measureNav = () => { measureNav(); navTick(); layoutIsland(); };
+  window.addEventListener('resize', () => SOLAR.measureNav());
+  window.addEventListener('load', () => SOLAR.measureNav());
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => SOLAR.measureNav());
 
   // mega menu: hover on desktop, click and keyboard everywhere
   let megaTimer = 0;
@@ -95,14 +190,13 @@
     if (open === !mega.hidden) return;
     mega.hidden = !open;
     megaBtn.setAttribute('aria-expanded', String(open));
-    header.classList.toggle('mega-open', open);
+    layoutIsland();
   }
   megaBtn.addEventListener('click', () => setMega(mega.hidden));
-  const hoverable = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   if (hoverable) {
     [megaBtn, mega].forEach((el) => {
       el.addEventListener('pointerenter', () => setMega(true));
-      el.addEventListener('pointerleave', () => { megaTimer = setTimeout(() => setMega(false), 220); });
+      el.addEventListener('pointerleave', () => { megaTimer = setTimeout(() => setMega(false), 240); });
     });
   }
   mega.addEventListener('click', (e) => {
@@ -117,7 +211,6 @@
     burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
     document.body.style.overflow = open ? 'hidden' : '';
     if (SOLAR.lenis) { if (open) SOLAR.lenis.stop(); else SOLAR.lenis.start(); }
-    header.classList.toggle('is-solid', open || window.scrollY > 40);
   }
   burger.addEventListener('click', () => setMenu(menu.hidden));
   menu.addEventListener('click', (e) => { if (e.target.closest('a')) setMenu(false); });
@@ -126,6 +219,7 @@
     if (!mega.hidden) { setMega(false); megaBtn.focus(); }
     if (!menu.hidden) { setMenu(false); burger.focus(); }
   });
+  SOLAR.measureNav();
 
   /* ---------------------------------------------------------------- 3 */
   const hero = $('.hero');
@@ -197,14 +291,14 @@
     const head = p.querySelector('.panel__head');
     head.addEventListener('click', () => openPanel(i));
     head.addEventListener('focus', () => openPanel(i));
-    if (hoverable) p.addEventListener('pointerenter', () => openPanel(i));
+    if (hoverable) p.addEventListener('pointermove', (e) => { if ((e.movementX || e.movementY) && !p.classList.contains('is-open')) openPanel(i); });
   });
 
   /* ---------------------------------------------------------------- 5 */
   const halves = $$('.split__half');
   function focusHalf(name) { halves.forEach((h) => h.classList.toggle('is-focus', h.dataset.half === name)); }
   halves.forEach((h) => {
-    if (hoverable) h.addEventListener('pointerenter', () => focusHalf(h.dataset.half));
+    if (hoverable) h.addEventListener('pointermove', (e) => { if ((e.movementX || e.movementY) && !h.classList.contains('is-focus')) focusHalf(h.dataset.half); });
     h.addEventListener('focusin', () => focusHalf(h.dataset.half));
     h.addEventListener('click', () => focusHalf(h.dataset.half));
   });

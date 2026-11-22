@@ -20,7 +20,7 @@ python3 -m http.server 8000
 
 | Section | What it does |
 | --- | --- |
-| **Header** | Fixed to the top of the screen at all times. Transparent over the hero, it turns to frosted glass once you scroll. **Solutions** opens a menu with photo cards. A small chip shows whether the sun is up near you. On phones there's a full-screen menu. |
+| **Header: the sun map** | A floating glass pill, fixed at the top. The sunburst logo has eight rays, one per section of the page (clockwise from the top). They fill with sunlight as you scroll: sections you have passed are lit, and the current one fills as you read it. Once you scroll, the pill shrinks to the current section, such as "04 / 08 *Homes & business*", and the name ticks over when you move on. Point at it, or tab into it, and it opens back up to the full links, with a soft highlight that glides under the link you point at. **Solutions** drops down a card of photo links. The centre of the sun is solid while the sun is up near the visitor and a ring after sunset. On phones there is a full-screen menu. |
 | **Hero** | Full-screen slideshow of four real photos with the cell transition, a slow zoom and progress bars you can click. Scrolling shrinks the photo into a rounded frame. |
 | **Trust bar** | 25-year warranty, 1–2 days on site, 24/7 monitoring, one crew. |
 | **Statement** | The words light up as you scroll, the counters count up, and an installer photo wipes in with parallax. |

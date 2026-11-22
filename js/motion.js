@@ -155,7 +155,7 @@
   gsap.set('.hero__row', { opacity: 1 });
   gsap.set('.hero__row > *', { y: 30, opacity: 0 });
   gsap.set('.hero__dock', { y: 20, opacity: 0 });
-  gsap.set('.header__bar > *', { y: -24, opacity: 0 });
+  gsap.set('#island', { y: -30, opacity: 0 });
 
   function intro() {
     // dark cells cover the first photo, then switch off from the centre out
@@ -179,7 +179,7 @@
     tl.fromTo(glows, { opacity: 0 }, { opacity: 0.9, duration: 0.25, ease: 'power1.in', stagger }, 0.1)
       .to(cells, { scale: 0, duration: 0.7, ease: 'power3.inOut', stagger }, 0.3)
       .fromTo(heroMedia, { scale: 1.2 }, { scale: 1, duration: 2.2, ease: 'expo.out', clearProps: 'transform' }, 0.3)
-      .to('.header__bar > *', { y: 0, opacity: 1, duration: 1.1, stagger: 0.06 }, 0.8)
+      .to('#island', { y: 0, opacity: 1, duration: 1.2, clearProps: 'transform' }, 0.8)
       .to('.hero .eyebrow', { y: 0, opacity: 1, duration: 1 }, 0.9)
       .to(titleWords, { yPercent: 0, duration: 1.4, stagger: 0.07 }, 0.95)
       .to('.hero__title .curl', { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.4, ease: 'power2.inOut' }, 1.35)
@@ -189,9 +189,8 @@
 
   /* ---------------------------------------------------------------- 4 */
   gsap.timeline({ scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } })
-    .fromTo(heroMedia, { clipPath: 'inset(0% 0% 0% 0% round 0px)' }, { clipPath: 'inset(7% 4% 7% 4% round 32px)', ease: 'none' }, 0)
-    .to('.slides', { scale: 1.12, ease: 'none' }, 0)
-    .to('.hero__content', { yPercent: -35, opacity: 0, ease: 'none' }, 0)
+    .to('.slides', { yPercent: 22, scale: 1.06, ease: 'none' }, 0)
+    .to('.hero__content', { yPercent: -30, opacity: 0, ease: 'none' }, 0)
     .to('.hero__dock', { opacity: 0, ease: 'none', duration: 0.4 }, 0);
 
   /* ---------------------------------------------------------------- 5
@@ -202,7 +201,7 @@
     root.classList.add('has-process-pin');
     const bar = $('[data-process-bar]');
     ScrollTrigger.create({
-      trigger: '.process', start: 'top top', end: '+=300%', pin: true,
+      trigger: '.process', start: 'top top', end: '+=300%', pin: true, anticipatePin: 1,
       onUpdate: (self) => {
         bar.style.setProperty('--p', Math.max(0.04, self.progress).toFixed(3));
         if (SOLAR.setStep) SOLAR.setStep(Math.min(3, Math.floor(self.progress * 4)));
@@ -226,7 +225,7 @@
     const tween = gsap.to(track, {
       x: () => -dist(), ease: 'none',
       scrollTrigger: {
-        trigger: '.projects', start: 'top top', end: () => '+=' + dist(), pin: true, scrub: 0.8, invalidateOnRefresh: true,
+        trigger: '.projects', start: 'top top', end: () => '+=' + dist(), pin: true, anticipatePin: 1, scrub: 0.8, invalidateOnRefresh: true,
         onUpdate: (self) => {
           bar.style.setProperty('--p', (0.2 + 0.8 * self.progress).toFixed(3));
           idx.textContent = String(Math.min(cards.length, Math.round(self.progress * (cards.length - 1)) + 1)).padStart(2, '0');
@@ -304,7 +303,7 @@
     .from('.form', { y: 80, opacity: 0, duration: 1.3, ease: 'expo.out' }, 0.1);
   gsap.from('.faq details', { y: 30, opacity: 0, duration: 1, stagger: 0.06, ease: 'expo.out', scrollTrigger: { trigger: '.faq', start: 'top 88%' } });
 
-  gsap.fromTo('.wordmark', { yPercent: 35, '--bgy': '0%' }, { yPercent: 0, '--bgy': '100%', ease: 'none', scrollTrigger: { trigger: '.footer', start: 'top bottom', end: 'bottom bottom', scrub: true } });
+  gsap.fromTo('.wordmark', { yPercent: 35 }, { yPercent: 0, ease: 'none', scrollTrigger: { trigger: '.footer', start: 'top bottom', end: 'bottom bottom', scrub: true } });
 
   /* ---------------------------------------------------------------- 7 */
   const mq = $('[data-marquee]');
@@ -356,7 +355,10 @@
   }
 
   /* ---------------------------------------------------------------- boot */
+  // re-measure once late fonts and images settle, so pinned sections never jump
+  ScrollTrigger.addEventListener('refresh', () => { if (SOLAR.measureNav) SOLAR.measureNav(); });
   window.addEventListener('load', () => ScrollTrigger.refresh());
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => ScrollTrigger.refresh());
   ScrollTrigger.refresh();
   const firstImg = $('.slide.is-active img');
   let started = false;

@@ -37,31 +37,41 @@
 <a class="skip" href="#main">Skip to content</a>
 <div class="cursor" aria-hidden="true"><div class="cursor__ring"><span class="cursor__label"></span></div><div class="cursor__dot"></div></div>
 
-<!-- ================= HEADER ================= -->
+<!-- ================= HEADER: the sun-map island =================
+     A floating glass pill. The logo's eight rays stand for the page's eight
+     sections and fill with sunlight as you scroll. -->
 <header class="header" id="header">
-  <div class="header__bar wrap">
-    <a class="logo" href="#top" aria-label="Solar, back to top">
-      <svg class="logo__mark" aria-hidden="true"><use href="#i-sun"/></svg>
-      <span class="logo__word">solar</span>
+  <div class="island" id="island" data-intro>
+    <a class="brand" href="#top" aria-label="Solar, back to top">
+      <svg class="sunmap" viewBox="-20 -20 40 40" aria-hidden="true">
+          <g class="ray" data-ray="0"><line class="ray__base" x1="0.00" y1="-8.50" x2="0.00" y2="-17.00"/><line class="ray__fill" pathLength="1" x1="0.00" y1="-8.50" x2="0.00" y2="-17.00"/></g>
+          <g class="ray" data-ray="1"><line class="ray__base" x1="6.01" y1="-6.01" x2="12.02" y2="-12.02"/><line class="ray__fill" pathLength="1" x1="6.01" y1="-6.01" x2="12.02" y2="-12.02"/></g>
+          <g class="ray" data-ray="2"><line class="ray__base" x1="8.50" y1="0.00" x2="17.00" y2="0.00"/><line class="ray__fill" pathLength="1" x1="8.50" y1="0.00" x2="17.00" y2="0.00"/></g>
+          <g class="ray" data-ray="3"><line class="ray__base" x1="6.01" y1="6.01" x2="12.02" y2="12.02"/><line class="ray__fill" pathLength="1" x1="6.01" y1="6.01" x2="12.02" y2="12.02"/></g>
+          <g class="ray" data-ray="4"><line class="ray__base" x1="0.00" y1="8.50" x2="0.00" y2="17.00"/><line class="ray__fill" pathLength="1" x1="0.00" y1="8.50" x2="0.00" y2="17.00"/></g>
+          <g class="ray" data-ray="5"><line class="ray__base" x1="-6.01" y1="6.01" x2="-12.02" y2="12.02"/><line class="ray__fill" pathLength="1" x1="-6.01" y1="6.01" x2="-12.02" y2="12.02"/></g>
+          <g class="ray" data-ray="6"><line class="ray__base" x1="-8.50" y1="0.00" x2="-17.00" y2="0.00"/><line class="ray__fill" pathLength="1" x1="-8.50" y1="0.00" x2="-17.00" y2="0.00"/></g>
+          <g class="ray" data-ray="7"><line class="ray__base" x1="-6.01" y1="-6.01" x2="-12.02" y2="-12.02"/><line class="ray__fill" pathLength="1" x1="-6.01" y1="-6.01" x2="-12.02" y2="-12.02"/></g>
+        <circle class="sunmap__core" r="4.6"/>
+      </svg>
+      <span class="brand__word">solar</span>
     </a>
 
-    <nav class="nav" aria-label="Primary">
-      <ul class="nav__list">
-        <li class="nav__item">
-          <button class="nav__link nav__link--menu" type="button" aria-expanded="false" aria-controls="mega" id="megaBtn">
-            Solutions <svg aria-hidden="true"><use href="#i-chev"/></svg>
-          </button>
-        </li>
-        <li class="nav__item"><a class="nav__link" href="#homes" data-split-target="homes">Homes</a></li>
-        <li class="nav__item"><a class="nav__link" href="#business" data-split-target="business">Business</a></li>
-        <li class="nav__item"><a class="nav__link" href="#process">How it works</a></li>
-        <li class="nav__item"><a class="nav__link" href="#projects">Projects</a></li>
-      </ul>
-    </nav>
+    <div class="island__mid" id="islandMid">
+      <nav class="nav" aria-label="Primary">
+        <span class="nav__lamp" aria-hidden="true"></span>
+        <ul class="nav__list">
+          <li><button class="nav__link" type="button" aria-expanded="false" aria-controls="mega" id="megaBtn" data-for="solutions">Solutions <svg aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+          <li><a class="nav__link" href="#homes" data-split-target="homes" data-for="homes">Homes</a></li>
+          <li><a class="nav__link" href="#business" data-split-target="business">Business</a></li>
+          <li><a class="nav__link" href="#process" data-for="process">How it works</a></li>
+          <li><a class="nav__link" href="#projects" data-for="projects">Projects</a></li>
+        </ul>
+      </nav>
+      <p class="now" aria-hidden="true"><span class="now__num"><span data-now-num>01</span><span class="now__of"> / 08</span></span><span class="now__label" data-now-label><span class="now__text">Welcome</span></span></p>
+    </div>
 
-    <p class="sunchip" data-sunchip title="Estimated from your time zone"><span class="sunchip__dot"></span><span data-sunchip-text>Sun’s up near you</span></p>
-
-    <a class="btn btn--sun btn--sm header__cta" href="#contact" data-magnetic>Get a free quote <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    <a class="island__cta" href="#contact">Get a free quote <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
 
     <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open menu">
       <span></span><span></span>
@@ -70,7 +80,7 @@
 
   <!-- Solutions mega menu -->
   <div class="mega" id="mega" hidden>
-    <div class="mega__inner wrap">
+    <div class="mega__inner">
       <p class="mega__intro">Everything your roof can <span class="curl">do</span>, designed and fitted by one crew.</p>
       <ul class="mega__grid">
         <li><a class="mega__card" href="#solutions" data-solution="0">
@@ -116,7 +126,7 @@
 <main id="main">
 
   <!-- ================= HERO ================= -->
-  <section class="hero" id="top">
+  <section class="hero" id="top" data-nav-label="Welcome">
     <div class="hero__media" data-hero-media>
       <div class="slides" data-slides>
         <figure class="slide is-active" data-caption="Homes in the open" data-sub="Rooftop solar with battery backup">
@@ -172,7 +182,7 @@
   </div>
 
   <!-- ================= STATEMENT ================= -->
-  <section class="statement">
+  <section class="statement" id="why" data-nav-label="Why solar">
     <div class="wrap statement__grid">
       <div class="statement__copy">
         <p class="label">Why solar, why us</p>
@@ -191,7 +201,7 @@
   </section>
 
   <!-- ================= SOLUTIONS ================= -->
-  <section class="solutions" id="solutions">
+  <section class="solutions" id="solutions" data-nav-label="What we do">
     <div class="wrap">
       <header class="sec-head">
         <p class="label">What we do</p>
@@ -247,7 +257,7 @@
   </section>
 
   <!-- ================= HOMES / BUSINESS ================= -->
-  <section class="split" id="homes" aria-label="Homes and business">
+  <section class="split" id="homes" aria-label="Homes and business" data-nav-label="Homes &amp; business">
     <span class="anchor" id="business"></span>
     <article class="split__half" data-half="homes" tabindex="0">
       <img src="assets/img/split-home.webp" alt="A large family house with solar panels covering both slopes of its roof" width="1600" height="1067" loading="lazy" data-parallax>
@@ -276,7 +286,7 @@
   </section>
 
   <!-- ================= PROCESS (daylight section) ================= -->
-  <section class="process" id="process">
+  <section class="process" id="process" data-nav-label="How it works">
     <div class="process__pin">
       <div class="wrap process__grid">
         <div class="process__copy">
@@ -320,7 +330,7 @@
   </section>
 
   <!-- ================= SIZER ================= -->
-  <section class="sizer" id="sizer">
+  <section class="sizer" id="sizer" data-nav-label="System sizer">
     <img class="sizer__bg" src="assets/img/calc-aerial.webp" alt="" width="1400" height="1050" loading="lazy" data-parallax>
     <div class="wrap sizer__grid">
       <div class="sizer__copy">
@@ -365,7 +375,7 @@
   </section>
 
   <!-- ================= PROJECTS ================= -->
-  <section class="projects" id="projects">
+  <section class="projects" id="projects" data-nav-label="Projects">
     <div class="projects__pin">
       <div class="wrap projects__head">
         <div>
@@ -410,7 +420,7 @@
   </div>
 
   <!-- ================= CONTACT ================= -->
-  <section class="contact" id="contact">
+  <section class="contact" id="contact" data-nav-label="Free quote">
     <img class="contact__bg" src="assets/img/contact-rays.webp" alt="" width="2000" height="1500" loading="lazy" data-parallax>
     <div class="contact__shade" aria-hidden="true"></div>
     <div class="wrap contact__grid">
